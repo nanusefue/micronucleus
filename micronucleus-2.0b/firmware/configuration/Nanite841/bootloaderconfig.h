@@ -3,18 +3,19 @@
  * This file (together with some settings in Makefile.inc) configures the boot loader
  * according to the hardware.
  * 
- * Controller type: ATtiny 45 - 16.5 MHz
- * Configuration:   Default configuration
- *       USB D- :   PB3
- *       USB D+ :   PB4
+ * Controller type: ATtiny 841 - 12 MHz
+ * Configuration:   Nanite841
+ *       USB D- :   PB1
+ *       USB D+ :   PB0
  *       Entry  :   Always
- *       LED    :   None
- *       OSCCAL :   Stays at 16 MHz
- * Note: Uses 16.5 MHz V-USB implementation with PLL
- * Last Change:     Mar 16,2014
+ *       LED    :   PB2, Active Low
+ *       OSCCAL :   Revert to precalibrated value (8 MHz)
+ * Note: can use 12 MHz V-USB without PLL due to stable RC-osc in ATTiny841
+ * Last Change:     June 5,2015
  *
  * License: GNU GPL v2 (see License.txt
  */
+
 #ifndef __bootloaderconfig_h_included__
 #define __bootloaderconfig_h_included__
 
@@ -23,16 +24,16 @@
 /*      Change this according to your CPU and USB configuration              */
 /* ------------------------------------------------------------------------- */
 
-#define USB_CFG_IOPORTNAME      A
+#define USB_CFG_IOPORTNAME      B
   /* This is the port where the USB bus is connected. When you configure it to
    * "B", the registers PORTB, PINB and DDRB will be used.
    */
 
-#define USB_CFG_DMINUS_BIT      0
+#define USB_CFG_DMINUS_BIT      1
 /* This is the bit number in USB_CFG_IOPORT where the USB D- line is connected.
  * This may be any bit in the port.
  */
-#define USB_CFG_DPLUS_BIT       7
+#define USB_CFG_DPLUS_BIT       0
 /* This is the bit number in USB_CFG_IOPORT where the USB D+ line is connected.
  * This may be any bit in the port, but must be configured as a pin change interrupt.
  */
@@ -53,28 +54,29 @@
 /* interrupts are disabled. So this has to be configured correctly.             */
 
 
-// setup interrupt for Pin Change for D+ Use Interrup By default
-
-
-#define USB_INTR_CFG            PCMSK
+// setup interrupt for Pin Change for D+
+#define USB_INTR_CFG            PCMSK1
 #define USB_INTR_CFG_SET        (1 << USB_CFG_DPLUS_BIT)
 #define USB_INTR_CFG_CLR        0
 #define USB_INTR_ENABLE         GIMSK
-#define USB_INTR_ENABLE_BIT     PCIE
+#define USB_INTR_ENABLE_BIT     PCIE1
 #define USB_INTR_PENDING        GIFR
-#define USB_INTR_PENDING_BIT    PCIF
-#define USB_INTR_VECTOR         PCINT0_vect
-
+#define USB_INTR_PENDING_BIT    PCIF1
+#define USB_INTR_VECTOR         PCINT1_vect
+    
 /* ------------------------------------------------------------------------- */
 /*       Configuration relevant to the CPU the bootloader is running on      */
 /* ------------------------------------------------------------------------- */
 
 // how many milliseconds should host wait till it sends another erase or write?
 // needs to be above 4.5 (and a whole integer) as avr freezes for 4.5ms
-#define MICRONUCLEUS_WRITE_SLEEP 5
 
-#ifndef WDTCR
-#define WDTCR WDTCSR
+// Set bit 7 to reduce wait time for page erase by factor of four
+#define MICRONUCLEUS_WRITE_SLEEP 128 + 5
+
+// ATtiny841 does not know OSCCAL
+#ifndef OSCCAL
+#define OSCCAL OSCCAL0
 #endif
 
 /* ---------------------- feature / code size options ---------------------- */
@@ -112,7 +114,7 @@
  * 
  */
 
-#define ENTRYMODE ENTRY_ALWAYS
+#define ENTRYMODE ENTRY_EXT_RESET
 
 #define JUMPER_PIN    PB0
 #define JUMPER_PORT   PORTB 
@@ -187,6 +189,10 @@
  *                            will be made to calibrate the oscillator. You should deactivate both options above
  *                            if you use this to avoid redundant code.
  *
+ *  OSCCAL_SLOW_PROGRAMMING   Setting this to '1' will set OSCCAL back to the factory calibration during programming to make
+ *                            sure correct timing is used for the flash writes. This is needed if the micronucleus clock 
+ *                            speed significantly deviated from the default clock. E.g. 12 Mhz on ATtiny841 vs. 8Mhz default.
+ *
  *  If both options are selected, OSCCAL_RESTORE_DEFAULT takes precedence.
  *
  *  If no option is selected, OSCCAL will be left untouched and stays at either factory calibration or F_CPU depending
@@ -194,9 +200,10 @@
  *  comes with its own OSCCAL calibration or an external clock source is used. 
  */
  
-#define OSCCAL_RESTORE_DEFAULT 0
+#define OSCCAL_RESTORE_DEFAULT 1
 #define OSCCAL_SAVE_CALIB 1
 #define OSCCAL_HAVE_XTAL 0
+#define OSCCAL_SLOW_PROGRAMMING 1
   
 /*  
  *  Defines handling of an indicator LED while the bootloader is active.  
@@ -211,11 +218,11 @@
  *
  */ 
 
-#define LED_MODE    NONE
+#define LED_MODE    ACTIVE_LOW
 
 #define LED_DDR     DDRB
 #define LED_PORT    PORTB
-#define LED_PIN     PB1
+#define LED_PIN     PB2
 
 /*
  *  This is the implementation of the LED code. Change the configuration above unless you want to 

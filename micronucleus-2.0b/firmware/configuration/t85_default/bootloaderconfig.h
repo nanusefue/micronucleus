@@ -3,7 +3,7 @@
  * This file (together with some settings in Makefile.inc) configures the boot loader
  * according to the hardware.
  * 
- * Controller type: ATtiny 45 - 16.5 MHz
+ * Controller type: ATtiny 85 - 16.5 MHz
  * Configuration:   Default configuration
  *       USB D- :   PB3
  *       USB D+ :   PB4
@@ -23,16 +23,16 @@
 /*      Change this according to your CPU and USB configuration              */
 /* ------------------------------------------------------------------------- */
 
-#define USB_CFG_IOPORTNAME      A
+#define USB_CFG_IOPORTNAME      B
   /* This is the port where the USB bus is connected. When you configure it to
    * "B", the registers PORTB, PINB and DDRB will be used.
    */
 
-#define USB_CFG_DMINUS_BIT      0
+#define USB_CFG_DMINUS_BIT      3
 /* This is the bit number in USB_CFG_IOPORT where the USB D- line is connected.
  * This may be any bit in the port.
  */
-#define USB_CFG_DPLUS_BIT       7
+#define USB_CFG_DPLUS_BIT       4
 /* This is the bit number in USB_CFG_IOPORT where the USB D+ line is connected.
  * This may be any bit in the port, but must be configured as a pin change interrupt.
  */
@@ -53,9 +53,7 @@
 /* interrupts are disabled. So this has to be configured correctly.             */
 
 
-// setup interrupt for Pin Change for D+ Use Interrup By default
-
-
+// setup interrupt for Pin Change for D+
 #define USB_INTR_CFG            PCMSK
 #define USB_INTR_CFG_SET        (1 << USB_CFG_DPLUS_BIT)
 #define USB_INTR_CFG_CLR        0
@@ -73,9 +71,6 @@
 // needs to be above 4.5 (and a whole integer) as avr freezes for 4.5ms
 #define MICRONUCLEUS_WRITE_SLEEP 5
 
-#ifndef WDTCR
-#define WDTCR WDTCSR
-#endif
 
 /* ---------------------- feature / code size options ---------------------- */
 /*               Configure the behavior of the bootloader here               */
@@ -114,10 +109,10 @@
 
 #define ENTRYMODE ENTRY_ALWAYS
 
-#define JUMPER_PIN    PB0
-#define JUMPER_PORT   PORTB 
-#define JUMPER_DDR    DDRB 
-#define JUMPER_INP    PINB 
+#define JUMPER_PIN    PA0
+#define JUMPER_PORT   PORTA 
+#define JUMPER_DDR    DDRA
+#define JUMPER_INP    PINA 
  
 /*
   Internal implementation, don't change this unless you want to add an entrymode.
@@ -213,9 +208,9 @@
 
 #define LED_MODE    NONE
 
-#define LED_DDR     DDRB
-#define LED_PORT    PORTB
-#define LED_PIN     PB1
+#define LED_DDR     DDRA
+#define LED_PORT    PORTA
+#define LED_PIN     PA1
 
 /*
  *  This is the implementation of the LED code. Change the configuration above unless you want to 

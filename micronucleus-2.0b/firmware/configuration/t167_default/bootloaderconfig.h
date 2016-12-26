@@ -1,20 +1,21 @@
-/* Name: bootloaderconfig.h
+ /* Name: bootloaderconfig.h
  * Micronucleus configuration file. 
  * This file (together with some settings in Makefile.inc) configures the boot loader
  * according to the hardware.
  * 
- * Controller type: ATtiny 45 - 16.5 MHz
- * Configuration:   Default configuration
+ * Controller type: ATtiny 167 - 16 MHz with crystal
+ * Configuration:   Standard configuration - Follows Digispark Pro defaults. Needs 16Mhz XTAL.
  *       USB D- :   PB3
- *       USB D+ :   PB4
+ *       USB D+ :   PB6
  *       Entry  :   Always
- *       LED    :   None
- *       OSCCAL :   Stays at 16 MHz
- * Note: Uses 16.5 MHz V-USB implementation with PLL
- * Last Change:     Mar 16,2014
+ *       LED    :   Active High on PB1
+ *       OSCCAL :   No change due to external crystal
+ * Note: Uses 16 MHz V-USB implementation. 
+ * Last Change:     JUn 15,2015
  *
  * License: GNU GPL v2 (see License.txt
  */
+
 #ifndef __bootloaderconfig_h_included__
 #define __bootloaderconfig_h_included__
 
@@ -23,16 +24,16 @@
 /*      Change this according to your CPU and USB configuration              */
 /* ------------------------------------------------------------------------- */
 
-#define USB_CFG_IOPORTNAME      A
+#define USB_CFG_IOPORTNAME      B
   /* This is the port where the USB bus is connected. When you configure it to
    * "B", the registers PORTB, PINB and DDRB will be used.
    */
 
-#define USB_CFG_DMINUS_BIT      0
+#define USB_CFG_DMINUS_BIT      3
 /* This is the bit number in USB_CFG_IOPORT where the USB D- line is connected.
  * This may be any bit in the port.
  */
-#define USB_CFG_DPLUS_BIT       7
+#define USB_CFG_DPLUS_BIT       6
 /* This is the bit number in USB_CFG_IOPORT where the USB D+ line is connected.
  * This may be any bit in the port, but must be configured as a pin change interrupt.
  */
@@ -53,17 +54,30 @@
 /* interrupts are disabled. So this has to be configured correctly.             */
 
 
-// setup interrupt for Pin Change for D+ Use Interrup By default
+// setup interrupt for Pin Change for D+
 
+// This is configured for PORTB.
 
-#define USB_INTR_CFG            PCMSK
+#define USB_INTR_CFG            PCMSK1
 #define USB_INTR_CFG_SET        (1 << USB_CFG_DPLUS_BIT)
 #define USB_INTR_CFG_CLR        0
-#define USB_INTR_ENABLE         GIMSK
-#define USB_INTR_ENABLE_BIT     PCIE
-#define USB_INTR_PENDING        GIFR
-#define USB_INTR_PENDING_BIT    PCIF
+#define USB_INTR_ENABLE         PCICR
+#define USB_INTR_ENABLE_BIT     PCIE1
+#define USB_INTR_PENDING        PCIFR
+#define USB_INTR_PENDING_BIT    PCIF1
+#define USB_INTR_VECTOR         PCINT1_vect
+
+/* Configuration for PORTA */
+/*
+#define USB_INTR_CFG            PCMSK0
+#define USB_INTR_CFG_SET        (1 << USB_CFG_DPLUS_BIT)
+#define USB_INTR_CFG_CLR        0
+#define USB_INTR_ENABLE         PCICR
+#define USB_INTR_ENABLE_BIT     PCIE0
+#define USB_INTR_PENDING        PCIFR
+#define USB_INTR_PENDING_BIT    PCIF0
 #define USB_INTR_VECTOR         PCINT0_vect
+*/
 
 /* ------------------------------------------------------------------------- */
 /*       Configuration relevant to the CPU the bootloader is running on      */
@@ -73,9 +87,6 @@
 // needs to be above 4.5 (and a whole integer) as avr freezes for 4.5ms
 #define MICRONUCLEUS_WRITE_SLEEP 5
 
-#ifndef WDTCR
-#define WDTCR WDTCSR
-#endif
 
 /* ---------------------- feature / code size options ---------------------- */
 /*               Configure the behavior of the bootloader here               */
@@ -195,8 +206,8 @@
  */
  
 #define OSCCAL_RESTORE_DEFAULT 0
-#define OSCCAL_SAVE_CALIB 1
-#define OSCCAL_HAVE_XTAL 0
+#define OSCCAL_SAVE_CALIB 0
+#define OSCCAL_HAVE_XTAL 1
   
 /*  
  *  Defines handling of an indicator LED while the bootloader is active.  
@@ -211,7 +222,7 @@
  *
  */ 
 
-#define LED_MODE    NONE
+#define LED_MODE    ACTIVE_HIGH
 
 #define LED_DDR     DDRB
 #define LED_PORT    PORTB

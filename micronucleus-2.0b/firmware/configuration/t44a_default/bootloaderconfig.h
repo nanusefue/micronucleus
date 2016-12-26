@@ -62,7 +62,7 @@
 #define USB_INTR_ENABLE         GIMSK
 #define USB_INTR_ENABLE_BIT     PCIE
 #define USB_INTR_PENDING        GIFR
-#define USB_INTR_PENDING_BIT    PCIF
+#define USB_INTR_PENDING_BIT    PCIFP
 #define USB_INTR_VECTOR         PCINT0_vect
 
 /* ------------------------------------------------------------------------- */
@@ -76,6 +76,7 @@
 #ifndef WDTCR
 #define WDTCR WDTCSR
 #endif
+
 
 /* ---------------------- feature / code size options ---------------------- */
 /*               Configure the behavior of the bootloader here               */
@@ -112,12 +113,12 @@
  * 
  */
 
-#define ENTRYMODE ENTRY_ALWAYS
+#define ENTRYMODE ENTRY_EXT_RESET
 
-#define JUMPER_PIN    PB0
-#define JUMPER_PORT   PORTB 
-#define JUMPER_DDR    DDRB 
-#define JUMPER_INP    PINB 
+#define JUMPER_PIN    PA1
+#define JUMPER_PORT   PORTA 
+#define JUMPER_DDR    DDRA 
+#define JUMPER_INP    PINA 
  
 /*
   Internal implementation, don't change this unless you want to add an entrymode.
@@ -195,8 +196,8 @@
  */
  
 #define OSCCAL_RESTORE_DEFAULT 0
-#define OSCCAL_SAVE_CALIB 1
-#define OSCCAL_HAVE_XTAL 0
+#define OSCCAL_SAVE_CALIB 0
+#define OSCCAL_HAVE_XTAL 1
   
 /*  
  *  Defines handling of an indicator LED while the bootloader is active.  
@@ -213,9 +214,9 @@
 
 #define LED_MODE    NONE
 
-#define LED_DDR     DDRB
-#define LED_PORT    PORTB
-#define LED_PIN     PB1
+#define LED_DDR     DDRA
+#define LED_PORT    PORTA
+#define LED_PIN     PA2
 
 /*
  *  This is the implementation of the LED code. Change the configuration above unless you want to 
