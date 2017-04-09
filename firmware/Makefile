@@ -10,7 +10,7 @@
 #CONFIG ?= t85_aggressive
 #CONFIG ?= t841_default
 #CONFIG ?= t167_default
-CONFIG ?= t44a_default
+CONFIG ?= t45_default
 
 ###############################################################################
 # Con#figure the following variables according to your AVR.
@@ -25,7 +25,7 @@ include $(CONFIGPATH)/Makefile.inc
 
 #PROGRAMMER ?= -c USBasp
 
-PROGRAMMER ?= -c usbtiny
+PROGRAMMER ?= -c avrisp2
 
 # PROGRAMMER contains AVRDUDE options to address your programmer
 
